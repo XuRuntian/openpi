@@ -73,7 +73,7 @@ def get_robocin_configs():
         TrainConfig(
             name="pi0_robocoin",
             model=pi0_config.Pi0Config(),
-            data=LeRobotoboCoinDataConfig(
+            data=LeRobotRoboCoinDataConfig(
                 repo_id="robocoin/eval_v1",
                 use_delta_joint_actions=False,
                 # base_config=DataConfig(prompt_from_task=True),
@@ -84,7 +84,7 @@ def get_robocin_configs():
         TrainConfig(
             name="pi0_robocoin_lora",
             model=pi0_config.Pi0Config(),
-            data=LeRobotoboCoinDataConfig(
+            data=LeRobotRoboCoinDataConfig(
                 repo_id="robocoin/eval_v1_anno",
                 use_delta_joint_actions=False,
                 # base_config=DataConfig(prompt_from_task=True),
@@ -98,7 +98,7 @@ def get_robocin_configs():
         TrainConfig(
             name="pi0_robocoin_delta",
             model=pi0_config.Pi0Config(),
-            data=LeRobotoboCoinDataConfig(
+            data=LeRobotRoboCoinDataConfig(
                 repo_id="robocoin/eval_v1",
                 use_delta_joint_actions=True,
                 # base_config=DataConfig(prompt_from_task=True),
@@ -109,7 +109,7 @@ def get_robocin_configs():
         TrainConfig(
             name="pi0_robocoin_lora_delta",
             model=pi0_config.Pi0Config(),
-            data=LeRobotoboCoinDataConfig(
+            data=LeRobotRoboCoinDataConfig(
                 repo_id="robocoin/eval_v1",
                 use_delta_joint_actions=True,
                 # base_config=DataConfig(prompt_from_task=True),
@@ -123,7 +123,7 @@ def get_robocin_configs():
         TrainConfig(
             name="pi0_robocoin_lora_debug",
             model=pi0_config.Pi0Config(),
-            data=LeRobotoboCoinDataConfig(
+            data=LeRobotRoboCoinDataConfig(
                 repo_id="robocoin/eval_v1_anno",
                 use_delta_joint_actions=False,
                 # base_config=DataConfig(prompt_from_task=True),
