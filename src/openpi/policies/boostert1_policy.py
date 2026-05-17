@@ -5,7 +5,7 @@ import numpy as np
 
 from openpi import transforms
 
-
+# 拿到的是干净的7joints +1gripper的16维动作空间。
 def make_boostert1_example() -> dict:
     return {
         "observation.state": np.random.rand(16),
@@ -28,14 +28,7 @@ class Boostert1Inputs(transforms.DataTransformFn):
 
     def __call__(self, data: dict) -> dict:
         base_image = _parse_image(data["observation.images.image_top"])
-        state_left_arm = data["observation.state"][2:9]
-        state_right_arm = data["observation.state"][9:16]
-        state_left_gripper = data["action"][12] / 1000
-        state_right_gripper = data["action"][13] / 1000
-        action_left_arm = data["observation.state"][2:9]
-        action_right_arm = data["observation.state"][9:16]
-        action_left_gripper = (data["action"][14] - 400) / (800 - 400)
-        action_right_gripper = (data["action"][19] - 400) / (800 - 400)
+        
         inputs = {
             "image": {
                 "base_0_rgb": base_image,
@@ -45,11 +38,11 @@ class Boostert1Inputs(transforms.DataTransformFn):
             },
         }
 
-        inputs["state"] = transforms.pad_to_dim(np.concatenate([state_left_arm, [state_left_gripper], state_right_arm, [state_right_gripper]]), 32)
+        inputs["state"] = transforms.pad_to_dim(data["observation.state"], 32)        
         inputs["prompt"] = data["prompt"]
 
         if "action" in data:
-            inputs["action"] = transforms.pad_to_dim(np.concatenate([action_left_arm, [action_left_gripper], action_right_arm, [action_right_gripper]]), 32)
+            inputs["action"] = transforms.pad_to_dim(data["action"], 32)
 
         return inputs
 
