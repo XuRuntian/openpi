@@ -5,7 +5,7 @@ import numpy as np
 
 from openpi import transforms
 
-# 拿到的是干净的7joints +1gripper的16维动作空间。
+
 def make_boostert1_example() -> dict:
     return {
         "observation.state": np.random.rand(16),
@@ -28,13 +28,17 @@ class Boostert1Inputs(transforms.DataTransformFn):
 
     def __call__(self, data: dict) -> dict:
         base_image = _parse_image(data["observation.images.image_top"])
-        
+        dummy_image = np.zeros_like(base_image)
         inputs = {
             "image": {
                 "base_0_rgb": base_image,
+                "left_wrist_0_rgb": dummy_image,
+                "right_wrist_0_rgb": dummy_image,
             },
             "image_mask": {
                 "base_0_rgb": np.True_,
+                "left_wrist_0_rgb": np.False_,
+                "right_wrist_0_rgb": np.False_,
             },
         }
 
