@@ -104,9 +104,9 @@ class Boostert1RealEnvironment(_environment.Environment):
         idx += 1
 
         return {
-            "state": state,
-            "images": images,
-            "prompt": self._prompt, 
+            "observation.state": state,
+            "observation.images.image_top": images["image_top"],
+            "prompt": self._prompt,
         }
 
     @override
@@ -114,7 +114,7 @@ class Boostert1RealEnvironment(_environment.Environment):
         """
         接收大模型推理输出的 1D Action 数组，将其转化为底层能够识别的 Follower 关节名字并下发
         """
-        model_action = action["actions"]  # 获取大模型输出的 1D 动作向量 (np.ndarray)
+        model_action = action["action"]  # 获取大模型输出的 1D 动作向量 (np.ndarray)
         
         action_dict = {}
         idx = 0

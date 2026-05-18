@@ -10,8 +10,8 @@ from lerobot.cameras import make_cameras_from_configs
 from lerobot.utils.errors import DeviceNotConnectedError, DeviceAlreadyConnectedError
 from lerobot.robots.robot import Robot
 
-from config import BoosterT1AioRos2RobotConfig
-from node import BoosterT1AioRos2Node
+from .config import BoosterT1AioRos2RobotConfig
+from .node import BoosterT1AioRos2Node
 
 
 logger = logging_mp.get_logger(__name__)
