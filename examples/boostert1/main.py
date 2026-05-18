@@ -20,6 +20,7 @@ class Args:
     action_horizon: int = 25
     num_episodes: int = 1
     max_episode_steps: int = 1000
+    prompt: str = "do something"
 
 def main(args: Args) -> None:
     # 1. 初始化 ROS2
@@ -47,7 +48,8 @@ def main(args: Args) -> None:
             environment=_env.Boostert1RealEnvironment(
                 robot=robot, # 传入机器人实例
                 render_height=224, 
-                render_width=224
+                render_width=224,
+                prompt=args.prompt
             ),
             agent=_policy_agent.PolicyAgent(
                 policy=action_chunk_broker.ActionChunkBroker(

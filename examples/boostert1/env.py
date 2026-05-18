@@ -37,11 +37,12 @@ class Boostert1RealEnvironment(_environment.Environment):
         robot,  # 接收从 main.py 传入的 BoosterT1AioRos2Robot 实例
         render_height: int = 224,
         render_width: int = 224,
+        prompt: str = "do something",
     ) -> None:
         self._robot = robot
         self._render_height = render_height
         self._render_width = render_width
-        
+        self._prompt = prompt
         self.left_joints = LEFT_ARM_JOINTS
         self.right_joints = RIGHT_ARM_JOINTS
         
