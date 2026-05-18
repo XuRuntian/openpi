@@ -106,7 +106,7 @@ class Boostert1RealEnvironment(_environment.Environment):
         return {
             "state": state,
             "images": images,
-            "prompt": "do something",  # 你可以根据需要动态生成或修改 prompt 内容
+            "prompt": self._prompt, 
         }
 
     @override
