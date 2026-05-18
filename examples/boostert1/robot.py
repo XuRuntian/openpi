@@ -10,8 +10,8 @@ from lerobot.cameras import make_cameras_from_configs
 from lerobot.utils.errors import DeviceNotConnectedError, DeviceAlreadyConnectedError
 from lerobot.robots.robot import Robot
 
-from .config import BoosterT1AioRos2RobotConfig
-from .node import BoosterT1AioRos2Node
+from config import BoosterT1AioRos2RobotConfig
+from node import BoosterT1AioRos2Node
 
 
 logger = logging_mp.get_logger(__name__)
@@ -415,30 +415,45 @@ class BoosterT1AioRos2Robot(Robot):
 
         from std_msgs.msg import Float32, Float64MultiArray
 
-        # 2. 组装并发送 14 轴双臂姿态
+        # 2. 组装并发送 14 轴双臂姿态（修复键名不匹配问题）
         q14_values = []
         for name in self._q14_names:
-            val = action.get(name, 0.0)  # 从字典中抓取对应关节的值
+            # 先尝试原始键名，再尝试LeRobot标准的follower_*.pos格式
+            val = action.get(name, 0.0)
+            if val == 0.0:
+                val = action.get(f"follower_{name}.pos", 0.0)
             q14_values.append(float(val))
-            
+        
+        # 调试打印：确认发送的关节值正确
+        print(f"📤 发送关节指令: {[f'{v:.4f}' for v in q14_values[:3]]}...")
+
         msg_q14 = Float64MultiArray()
         msg_q14.data = q14_values
         self.robot_ros2_node.pub_q14.publish(msg_q14)
 
         # 3. 处理左夹爪发送 (将 0.0~1.0 映射到 0~1000)
+        left_gripper_val = 0.0
         if "left_gripper" in action:
-            msg_lg = Float32()
-            # 严格限幅在 0~1000 之间
-            target_pos = max(0.0, min(1000.0, action["left_gripper"] * 1000.0))
-            msg_lg.data = float(target_pos)
-            self.robot_ros2_node.pub_left_gripper.publish(msg_lg)
+            left_gripper_val = action["left_gripper"]
+        elif "follower_left_gripper.pos" in action:
+            left_gripper_val = action["follower_left_gripper.pos"]
+        
+        msg_lg = Float32()
+        target_pos = max(0.0, min(1000.0, left_gripper_val * 1000.0))
+        msg_lg.data = float(target_pos)
+        self.robot_ros2_node.pub_left_gripper.publish(msg_lg)
 
         # 4. 处理右夹爪发送 (将 0.0~1.0 映射到 0~1000)
+        right_gripper_val = 0.0
         if "right_gripper" in action:
-            msg_rg = Float32()
-            target_pos = max(0.0, min(1000.0, action["right_gripper"] * 1000.0))
-            msg_rg.data = float(target_pos)
-            self.robot_ros2_node.pub_right_gripper.publish(msg_rg)
+            right_gripper_val = action["right_gripper"]
+        elif "follower_right_gripper.pos" in action:
+            right_gripper_val = action["follower_right_gripper.pos"]
+        
+        msg_rg = Float32()
+        target_pos = max(0.0, min(1000.0, right_gripper_val * 1000.0))
+        msg_rg.data = float(target_pos)
+        self.robot_ros2_node.pub_right_gripper.publish(msg_rg)
 
-        # 保持原接口返回值不变，避免 LeRobot 内部记录 Log 时中断
+        # 保持原接口返回值不变，避免LeRobot内部记录Log时中断
         return {f"{arm_motor}.pos": val for arm_motor, val in action.items()}

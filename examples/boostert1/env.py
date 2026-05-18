@@ -76,7 +76,7 @@ class Boostert1RealEnvironment(_environment.Environment):
                 image_tools.resize_with_pad(raw_obs["image_top"], self._render_height, self._render_width)
             )
             # 调整维度顺序以符合大模型对 Tensor 的输入期望
-            images["cam_high"] = einops.rearrange(img, "h w c -> c h w")
+            images["image_top"] = einops.rearrange(img, "h w c -> c h w")
         else:
             raise RuntimeError("错误: 未能在状态字典中获取到 'image_top' 顶置相机的图像。")
 
@@ -105,6 +105,7 @@ class Boostert1RealEnvironment(_environment.Environment):
         return {
             "state": state,
             "images": images,
+            "prompt": "do something",  # 你可以根据需要动态生成或修改 prompt 内容
         }
 
     @override

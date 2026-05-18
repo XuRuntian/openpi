@@ -37,7 +37,6 @@ QOS_BEST_EFFORT = QoSProfile(
 
 # 由生成脚本根据 JSON 自动生成
 NODE_CONFIG = {
-
     "follower_joint_topics": {
         "follower_joint_states": {
             "topic": "/joint_states",
@@ -51,8 +50,8 @@ NODE_CONFIG = {
 
     "camera_topics": {
         "image_top": {
-            "topic": "/head_camera/image_raw",
-            "msg": "Image"
+            "topic": "/head_camera/image_raw/compressed",
+            "msg": "CompressedImage"
         }
     }
 }
@@ -68,18 +67,14 @@ class BoosterT1AioRos2Node(Node):
 
     def __init__(
         self,
-        leader_joint_topics: Optional[Dict[str, Dict[str, str]]] = None,
         follower_joint_topics: Optional[Dict[str, Dict[str, str]]] = None,
         camera_topics: Optional[Dict[str, Dict[str, str]]] = None,
     ):
         super().__init__("boostert1_aio_ros2_direct")
 
-        self.leader_joint_cfgs = leader_joint_topics or NODE_CONFIG["leader_joint_topics"]
         self.follower_joint_cfgs = follower_joint_topics or NODE_CONFIG["follower_joint_topics"]
         self.camera_cfgs = camera_topics or NODE_CONFIG["camera_topics"]
 
-        if not self.leader_joint_cfgs:
-            raise RuntimeError("leader_joint_topics is empty")
         if not self.follower_joint_cfgs:
             raise RuntimeError("follower_joint_topics is empty")
 
@@ -123,34 +118,6 @@ class BoosterT1AioRos2Node(Node):
             # follower 强烈建议 BEST_EFFORT，避免 QoS incompatible
             self.create_subscription(msg_cls, topic, callback, QOS_BEST_EFFORT)
             logger.info(f"[Direct] Follower subscriber '{comp_name}' at {topic} ({msg_name})")
-
-        # ---------- leader subscriptions ----------
-        for comp_name, cfg in self.leader_joint_cfgs.items():
-            topic = cfg["topic"]
-            msg_name = cfg.get("msg", "JointState")
-
-            if msg_name == "JointState":
-                msg_cls = JointState
-                callback = lambda msg, cname=comp_name: self._joint_callback_leader(cname, msg)
-            elif msg_name == "Pose":
-                msg_cls = Pose
-                callback = lambda msg, cname=comp_name: self._pose_callback_leader(cname, msg)
-            elif msg_name == "Odometry":
-                msg_cls = Odometry
-                callback = lambda msg, cname=comp_name: self._odom_callback_leader(cname, msg)
-            elif msg_name == "Float32MultiArray":
-                msg_cls = Float32MultiArray
-                expect_len = int(cfg.get("len", 0))
-                callback = lambda msg, cname=comp_name, el=expect_len: self._f32marray_callback_leader(cname, msg, el)
-            elif msg_name == "Float32":
-                msg_cls = Float32
-                callback = lambda msg, cname=comp_name: self._f32_callback_leader(cname, msg)
-            else:
-                raise RuntimeError(f"Unsupported leader msg type: {msg_name}")
-
-            self.create_subscription(msg_cls, topic, callback, QOS_BEST_EFFORT)
-            logger.info(f"[Direct] Leader subscriber '{comp_name}' at {topic} ({msg_name})")
-
         # （保留你原来的发布器：如果你确实要发 /joint_states）
         self.pub_action_joint_states = self.create_publisher(JointState, "/joint_states", 10)
 

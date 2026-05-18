@@ -27,7 +27,14 @@ def _parse_image(image) -> np.ndarray:
 class Boostert1Inputs(transforms.DataTransformFn):
 
     def __call__(self, data: dict) -> dict:
-        base_image = _parse_image(data["observation.images.image_top"])
+        if "observation.images.image_top" in data:
+            raw_image = data["observation.images.image_top"]
+            raw_state = data["observation.state"]
+        else:
+            raw_image = data["images"]["image_top"]
+            raw_state = data["state"]
+        base_image = _parse_image(raw_image)
+        # base_image = _parse_image(data["observation.images.image_top"])
         dummy_image = np.zeros_like(base_image)
         inputs = {
             "image": {
@@ -43,7 +50,7 @@ class Boostert1Inputs(transforms.DataTransformFn):
         }
 
         inputs["state"] = transforms.pad_to_dim(data["observation.state"], 32)        
-        inputs["prompt"] = data["prompt"]
+        inputs["prompt"] = data.get("prompt", "do something")
 
         if "action" in data:
             inputs["action"] = transforms.pad_to_dim(data["action"], 32)
